@@ -23,7 +23,7 @@
 
 1. 调用远程方法
     ```java
-    public class MainController {
+    public class Test {
         @Resource
         private Hermes hermes;
         
