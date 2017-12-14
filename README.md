@@ -58,5 +58,3 @@
         }
     }
     ```
-    
-1. 访问http://localhost/hermesManage可以查看注册信息
