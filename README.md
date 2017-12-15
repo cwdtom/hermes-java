@@ -24,8 +24,7 @@
 1. 启用hermes
     ```java
     @SpringBootApplication
-    @EnableScheduling
-    @ComponentScan("com.qurong.hermes")
+    @EnableHermes
     public class ApplicationMain {
         public static void main(String[] args) {
             // 启动Spring Boot项目的唯一入口
@@ -33,8 +32,7 @@
         }
     }
     ```
-    1. 必须添加@EnableScheduling注解
-    1. 必须单独扫描@ComponentScan("com.qurong.hermes")
+    1. 添加@EnableHermes注解
 
 1. 调用远程方法
     ```java

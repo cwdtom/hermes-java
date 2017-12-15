@@ -82,13 +82,8 @@ public class InitializeData {
                 .setUrls(ClasspathHelper.forClassLoader())
                 .setExpandSuperTypes(false)
         );
-        // 检查是否开启定时任务
-        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(EnableScheduling.class);
-        if (classes.size() == 0) {
-            throw new ExceptionInInitializerError("@EnableScheduling not found");
-        }
-        // 获取Hermes注解类
-        classes = reflections.getTypesAnnotatedWith(HermesService.class);
+        // 获取HermesService注解类
+        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(HermesService.class);
         Map<String, ServerMethod> map = new TreeMap<>();
         for (Class c : classes) {
             Method[] methods = c.getDeclaredMethods();
