@@ -1,11 +1,17 @@
 package com.qurong.hermes.entity;
 
+import java.util.Map;
+
 /**
  * 项目常量
  *
  * @author chenweidong
  */
 public class Constant {
+    /**
+     * 方法路径映射
+     */
+    public static Map<String, ServerMethod> methodMap;
     /**
      * 状态码字段
      */

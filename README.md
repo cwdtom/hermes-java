@@ -10,13 +10,13 @@
 
 ## Configuration
 - application中添加新配置
-    ```properties
+    ```text
    # 注册中心地址，多个地址以逗号隔开
    hermes.center-zone=127.0.0.1:8080
    # 自身服务ID
    hermes.server-id=client
    # 本地服务地址
-   hermes.host=127.0.0.1:8081
+   hermes.host=127.0.0.1
     ```
 
 ## Usage

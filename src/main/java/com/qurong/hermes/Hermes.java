@@ -2,16 +2,15 @@ package com.qurong.hermes;
 
 import com.alibaba.fastjson.JSON;
 import com.qurong.hermes.entity.Center;
-
-import javax.annotation.Resource;
+import lombok.Data;
 
 /**
  * 服务方法
  *
  * @author chenweidong
  */
+@Data
 public class Hermes {
-    @Resource
     private Center[] centers;
 
     /**
@@ -24,7 +23,7 @@ public class Hermes {
      */
     public String call(String serverId, String name, Object data) throws Exception {
         String send = JSON.toJSONString(data);
-        Integer index = (int) (Math.random() * centers.length);
-        return centers[index].call(serverId, name, send);
+        Integer index = (int) (Math.random() * this.centers.length);
+        return this.centers[index].call(serverId, name, send);
     }
 }

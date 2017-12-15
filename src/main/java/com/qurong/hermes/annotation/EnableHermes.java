@@ -1,16 +1,16 @@
 package com.qurong.hermes.annotation;
 
-import org.springframework.context.annotation.ComponentScan;
+import com.qurong.hermes.HermesRegister;
+import com.qurong.hermes.timer.Timer;
+import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@ComponentScan("com.qurong.hermes")
+@Documented
+@Import({HermesRegister.class, Timer.class})
 @EnableScheduling
 public @interface EnableHermes {
 }

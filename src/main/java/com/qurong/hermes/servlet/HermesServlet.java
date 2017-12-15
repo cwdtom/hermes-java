@@ -1,6 +1,7 @@
 package com.qurong.hermes.servlet;
 
 import com.alibaba.fastjson.JSON;
+import com.qurong.hermes.Hermes;
 import com.qurong.hermes.entity.ApplicationContextHelper;
 import com.qurong.hermes.entity.Center;
 import com.qurong.hermes.entity.Constant;
@@ -15,7 +16,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 
 /**
  * 调用服务
@@ -80,8 +80,8 @@ public class HermesServlet extends HttpServlet {
      * @return 注册中心
      */
     private Center getCenterBySessionId(String sessionId) {
-        Center[] centers = (Center[]) ApplicationContextHelper.getBean("centers");
-        for (Center c : centers) {
+        Hermes hermes = (Hermes) ApplicationContextHelper.getBean("hermes");
+        for (Center c : hermes.getCenters()) {
             if (sessionId.equals(c.getSessionId())) {
                 return c;
             }
@@ -97,10 +97,7 @@ public class HermesServlet extends HttpServlet {
      */
     private Object invokeMethodByName(String name, String argv)
             throws InvocationTargetException, IllegalAccessException {
-        @SuppressWarnings("unchecked")
-        Map<String, ServerMethod> methodMap =
-                (Map<String, ServerMethod>) ApplicationContextHelper.getBean("methodMap");
-        ServerMethod target = methodMap.get(name);
+        ServerMethod target = Constant.methodMap.get(name);
         return target.getMethod().invoke(target.getObject(), argv);
     }
 }

@@ -23,6 +23,8 @@ public class Center {
     private Integer timeout;
     private String sessionId;
     private Boolean status;
+    private String serverId;
+    private String address;
 
     public Center(String host) {
         this.host = host;
@@ -33,13 +35,13 @@ public class Center {
      * 注册
      *
      * @param serverId 服务ID
-     * @param ownHost  服务host
+     * @param address  服务host
      * @throws IOException 请求异常
      */
-    public void register(String serverId, String ownHost) throws IOException {
+    public void register(String serverId, String address) throws IOException {
         String sessionId = getRandom();
         String resp = HttpUtils.sendGet("http://" + this.host + "/register",
-                "id=" + serverId + "&sessionId=" + sessionId + "&host=" + ownHost);
+                "id=" + serverId + "&sessionId=" + sessionId + "&host=" + address);
         JSONObject obj = JSON.parseObject(resp);
         JSONObject data = obj.getJSONObject(Constant.DATA);
         String[] tmp = data.getString("PublicKey").split("\n");
@@ -48,6 +50,8 @@ public class Center {
         this.timeout = data.getInteger("Timeout");
         this.status = true;
         this.sessionId = sessionId;
+        this.serverId = serverId;
+        this.address = address;
     }
 
     /**
@@ -67,9 +71,8 @@ public class Center {
         this.status = obj.getInteger(Constant.CODE) == 0;
         if (!this.status) {
             // 尝试重新注册
-            HermesConfig config = (HermesConfig) ApplicationContextHelper.getBean("config");
             try {
-                this.register(config.getServerId(), config.getHost());
+                this.register(this.serverId, this.address);
             } catch (IOException ignored) {
             }
         }
