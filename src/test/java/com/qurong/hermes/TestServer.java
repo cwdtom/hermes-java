@@ -5,6 +5,7 @@ import com.qurong.hermes.annotation.HermesMapping;
 
 /**
  * 测试
+ *
  * @author chenweidong
  */
 @HermesService

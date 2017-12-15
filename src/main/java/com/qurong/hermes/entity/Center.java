@@ -6,6 +6,7 @@ import com.qurong.hermes.utils.CoderUtils;
 import com.qurong.hermes.utils.HttpUtils;
 import com.qurong.hermes.utils.RsaUtils;
 import lombok.Data;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.Random;
@@ -39,13 +40,13 @@ public class Center {
      * @throws IOException 请求异常
      */
     public void register(String serverId, String address) throws IOException {
-        String sessionId = getRandom();
-        String resp = HttpUtils.sendGet("http://" + this.host + "/register",
-                "id=" + serverId + "&sessionId=" + sessionId + "&host=" + address);
-        JSONObject obj = JSON.parseObject(resp);
-        JSONObject data = obj.getJSONObject(Constant.DATA);
+        String sessionId = getRandomString();
+
+        String resp = HttpUtils.sendGet(String.format("http://%s/register?id=%s&sessionId=%s&host=%s",
+                this.host, serverId, sessionId, address));
+        JSONObject data = JSON.parseObject(resp).getJSONObject(Constant.DATA);
         String[] tmp = data.getString("PublicKey").split("\n");
-        this.publicKey = tmp[1] + tmp[2] + tmp[3] + tmp[4];
+        this.publicKey = String.format("%s%s%s%s", tmp[1], tmp[2], tmp[3], tmp[4]);
         this.length = data.getInteger("Length");
         this.timeout = data.getInteger("Timeout");
         this.status = true;
@@ -60,8 +61,8 @@ public class Center {
     public void heartBeat() {
         String resp;
         try {
-            resp = HttpUtils.sendGet("http://" + this.host + "/heartBeat",
-                    "sessionId=" + this.sessionId);
+
+            resp = HttpUtils.sendGet(String.format("http://%s/heartBeat?sessionId=%s", this.host, this.sessionId));
         } catch (IOException e) {
             // 心跳失败
             this.status = false;
@@ -93,15 +94,13 @@ public class Center {
             throw new Exception("data is too big");
         }
         byte[] bytes = RsaUtils.encryptByPublicKey(in, this.publicKey);
-        // send转16进制
-        String send = CoderUtils.bytesToHex(bytes);
-        String resp = HttpUtils.sendGet("http://" + this.host + "/server",
-                "sessionId=" + this.sessionId + "&serverId=" + serverId +
-                        "&name=" + name + "&data=" + send);
+        // bytes转16进制发送
+        String resp = HttpUtils.sendGet(String.format("http://%s/server?sessionId=%s&serverId=%s&name=%s&data=%s",
+                this.host, this.sessionId, serverId, name, CoderUtils.bytesToHex(bytes)));
         JSONObject obj = JSON.parseObject(resp);
         Integer code = obj.getInteger(Constant.CODE);
         if (code != 0) {
-            throw new Exception("call server fail, fail code: " + code);
+            throw new Exception(String.format("call server fail, fail code: %d", code));
         }
         // 解密响应
         byte[] receive = RsaUtils.decryptByPublicKey(obj.getBytes(Constant.DATA), this.publicKey);
@@ -113,7 +112,7 @@ public class Center {
      *
      * @return 随机数
      */
-    private String getRandom() {
+    private String getRandomString() {
         Random random = new Random();
         StringBuilder ret = new StringBuilder();
         for (int i = 0; i < Constant.SESSION_ID_LENGTH; i++) {

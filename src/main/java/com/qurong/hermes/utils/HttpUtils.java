@@ -16,17 +16,12 @@ public class HttpUtils {
      * 发送GET请求
      *
      * @param url   目标URL
-     * @param param 参数，格式：name1=value1&name2=value2
      * @return 响应结果
      */
-    public static String sendGet(String url, String param) throws IOException {
+    public static String sendGet(String url) throws IOException {
         StringBuilder result = new StringBuilder();
-        String urlNameString = url + "?" + param;
-        URL realUrl = new URL(urlNameString);
-        // 打开URL连接
+        URL realUrl = new URL(url);
         URLConnection connection = realUrl.openConnection();
-        connection.setDoOutput(false);
-        // 打开连接
         connection.connect();
         try(BufferedReader in = new BufferedReader(
                 new InputStreamReader(connection.getInputStream(), "UTF-8"))) {

@@ -1,7 +1,6 @@
 package com.qurong.hermes;
 
 import com.alibaba.fastjson.JSON;
-import com.qurong.hermes.entity.Center;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,12 +24,12 @@ public class MainController {
     }
 
     @RequestMapping("/callAdd")
-    public String callAdd(Integer num) throws Exception {
+    public String callAdd(Integer num) {
         return hermes.call("client", "testAdd", num);
     }
 
     @RequestMapping("/callSub")
-    public String callSub(Integer num) throws Exception {
+    public String callSub(Integer num) {
         return hermes.call("client", "testSub", num);
     }
 }

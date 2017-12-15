@@ -39,17 +39,18 @@ public class HermesRegister implements ImportBeanDefinitionRegistrar,
     private Environment environment;
 
     /**
-     * 注册
+     * 注册hermes
      */
-    private void register(BeanDefinitionRegistry registry) {
+    private void registerHermes(BeanDefinitionRegistry registry) {
         String[] zones = this.environment.getProperty("hermes.center-zone").split(",");
         Center[] centers = new Center[zones.length];
         for (int i=0; i<zones.length; i++) {
             Center center = new Center(zones[i]);
             try {
+
                 center.register(this.environment.getProperty("hermes.server-id"),
-                        this.environment.getProperty("hermes.host") + ":"
-                                + this.environment.getProperty("server.port"));
+                        String.format("%s:%s", this.environment.getProperty("hermes.host"),
+                                this.environment.getProperty("server.port")));
             } catch (IOException e) {
                 // 注册失败
                 continue;
@@ -91,7 +92,7 @@ public class HermesRegister implements ImportBeanDefinitionRegistrar,
     @Override
     public void registerBeanDefinitions(AnnotationMetadata metadata,
                                         BeanDefinitionRegistry registry) {
-        register(registry);
+        registerHermes(registry);
     }
 
     private Map<String, ServerMethod> getMethodMap() {
@@ -104,8 +105,7 @@ public class HermesRegister implements ImportBeanDefinitionRegistrar,
         Set<Class<?>> classes = reflections.getTypesAnnotatedWith(HermesService.class);
         Map<String, ServerMethod> map = new TreeMap<>();
         for (Class c : classes) {
-            Method[] methods = c.getDeclaredMethods();
-            for (Method method : methods) {
+            for (Method method : c.getDeclaredMethods()) {
                 Object object;
                 try {
                     object = c.newInstance();

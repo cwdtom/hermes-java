@@ -3,7 +3,7 @@ package com.qurong.hermes.entity;
 import java.util.Map;
 
 /**
- * 项目常量
+ * 项目静态量
  *
  * @author chenweidong
  */
