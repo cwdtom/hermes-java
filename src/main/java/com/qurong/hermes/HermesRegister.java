@@ -1,10 +1,11 @@
 package com.qurong.hermes;
 
+import com.qurong.hermes.annotation.HermesClient;
 import com.qurong.hermes.annotation.HermesMapping;
 import com.qurong.hermes.annotation.HermesService;
-import com.qurong.hermes.entity.ApplicationContextHelper;
 import com.qurong.hermes.entity.Center;
 import com.qurong.hermes.entity.Constant;
+import com.qurong.hermes.entity.HermesClientFactoryBean;
 import com.qurong.hermes.entity.ServerMethod;
 import com.qurong.hermes.servlet.HermesServlet;
 import org.reflections.Reflections;
@@ -35,20 +36,19 @@ import java.util.TreeMap;
  */
 public class HermesRegister implements ImportBeanDefinitionRegistrar,
         ResourceLoaderAware, BeanClassLoaderAware, EnvironmentAware {
-    private ClassLoader classLoader;
     private Environment environment;
 
     /**
-     * 注册hermes
+     * 注册bean
      */
     private void registerHermes(BeanDefinitionRegistry registry) {
         String[] zones = this.environment.getProperty("hermes.center-zone").split(",");
         Center[] centers = new Center[zones.length];
-        for (int i=0; i<zones.length; i++) {
+        for (int i = 0; i < zones.length; i++) {
             Center center = new Center(zones[i]);
             try {
 
-                center.register(this.environment.getProperty("hermes.server-id"),
+                center.register(this.environment.getProperty("spring.application.name"),
                         String.format("%s:%s", this.environment.getProperty("hermes.host"),
                                 this.environment.getProperty("server.port")));
             } catch (IOException e) {
@@ -57,27 +57,28 @@ public class HermesRegister implements ImportBeanDefinitionRegistrar,
             }
             centers[i] = center;
         }
-        // 注册Hermes
-        BeanDefinitionBuilder bdb = BeanDefinitionBuilder.rootBeanDefinition(Hermes.class)
-                .addPropertyValue("centers", centers);
-        registry.registerBeanDefinition("hermes", bdb.getBeanDefinition());
+        // 赋值全局注册中心
+        Constant.centers = centers;
         // 注册监听
         Set<String> urlMappings = new HashSet<>(1);
         urlMappings.add("/hermes");
-        bdb = BeanDefinitionBuilder.rootBeanDefinition(ServletRegistrationBean.class)
+        BeanDefinitionBuilder bdb = BeanDefinitionBuilder.rootBeanDefinition(ServletRegistrationBean.class)
                 .addPropertyValue("servlet", new HermesServlet())
                 .addPropertyValue("urlMappings", urlMappings);
         registry.registerBeanDefinition("hermesServlet", bdb.getBeanDefinition());
+        // 扫描所有类，forPackage放空字符串表示扫描主包
+        Reflections reflections = new Reflections(new ConfigurationBuilder()
+                .setUrls(ClasspathHelper.forPackage(""))
+                .setExpandSuperTypes(false)
+        );
         // 赋值全局方法映射
-        Constant.methodMap = this.getMethodMap();
-        // 注册applicationContextHelper
-        bdb = BeanDefinitionBuilder.rootBeanDefinition(ApplicationContextHelper.class);
-        registry.registerBeanDefinition("ApplicationContextHelper", bdb.getBeanDefinition());
+        Constant.methodMap = this.getMethodMap(reflections);
+        // 注册client
+        registerClient(reflections, registry);
     }
 
     @Override
     public void setBeanClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
     }
 
     @Override
@@ -95,16 +96,11 @@ public class HermesRegister implements ImportBeanDefinitionRegistrar,
         registerHermes(registry);
     }
 
-    private Map<String, ServerMethod> getMethodMap() {
-        // 扫描所有类
-        Reflections reflections = new Reflections(new ConfigurationBuilder()
-                .setUrls(ClasspathHelper.forClassLoader(this.classLoader))
-                .setExpandSuperTypes(false)
-        );
+    private Map<String, ServerMethod> getMethodMap(Reflections reflections) {
         // 获取HermesService注解类
         Set<Class<?>> classes = reflections.getTypesAnnotatedWith(HermesService.class);
         Map<String, ServerMethod> map = new TreeMap<>();
-        for (Class c : classes) {
+        for (Class<?> c : classes) {
             for (Method method : c.getDeclaredMethods()) {
                 Object object;
                 try {
@@ -119,5 +115,15 @@ public class HermesRegister implements ImportBeanDefinitionRegistrar,
             }
         }
         return map;
+    }
+
+    private void registerClient(Reflections reflections, BeanDefinitionRegistry registry) {
+        // 获取HermesClient注解类
+        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(HermesClient.class);
+        for (Class<?> c : classes) {
+            BeanDefinitionBuilder bdb = BeanDefinitionBuilder.rootBeanDefinition(HermesClientFactoryBean.class)
+                    .addPropertyValue("type", c);
+            registry.registerBeanDefinition(c.getName(), bdb.getBeanDefinition());
+        }
     }
 }

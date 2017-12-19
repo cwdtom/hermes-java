@@ -9,6 +9,10 @@ import java.util.Map;
  */
 public class Constant {
     /**
+     * 注册中心列表
+     */
+    public static Center[] centers;
+    /**
      * 方法路径映射
      */
     public static Map<String, ServerMethod> methodMap;

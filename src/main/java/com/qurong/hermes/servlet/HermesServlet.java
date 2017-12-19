@@ -1,8 +1,9 @@
 package com.qurong.hermes.servlet;
 
 import com.alibaba.fastjson.JSON;
-import com.qurong.hermes.Hermes;
-import com.qurong.hermes.entity.ApplicationContextHelper;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
+import com.qurong.hermes.annotation.HermesParam;
 import com.qurong.hermes.entity.Center;
 import com.qurong.hermes.entity.Constant;
 import com.qurong.hermes.entity.ServerMethod;
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Parameter;
 
 /**
  * 调用服务
@@ -80,8 +82,7 @@ public class HermesServlet extends HttpServlet {
      * @return 注册中心
      */
     private Center getCenterBySessionId(String sessionId) {
-        Hermes hermes = (Hermes) ApplicationContextHelper.getBean("hermes");
-        for (Center c : hermes.getCenters()) {
+        for (Center c : Constant.centers) {
             if (sessionId.equals(c.getSessionId())) {
                 return c;
             }
@@ -91,6 +92,7 @@ public class HermesServlet extends HttpServlet {
 
     /**
      * 调用注册方法
+     *
      * @param name 方法注册名
      * @param argv 参数
      * @return 处理结果
@@ -98,6 +100,19 @@ public class HermesServlet extends HttpServlet {
     private Object invokeMethodByName(String name, String argv)
             throws InvocationTargetException, IllegalAccessException {
         ServerMethod target = Constant.methodMap.get(name);
-        return target.getMethod().invoke(target.getObject(), argv);
+        Parameter[] params = target.getMethod().getParameters();
+        try {
+            JSONObject jo = JSON.parseObject(argv);
+            int len = params.length;
+            Object[] args = new Object[len];
+            for (int i = 0; i < len; i++) {
+                HermesParam hp = params[i].getAnnotation(HermesParam.class);
+                Object arg = jo.get(hp.value());
+                args[i] = arg;
+            }
+            return target.getMethod().invoke(target.getObject(), args);
+        } catch (JSONException ignored) {
+            return target.getMethod().invoke(target.getObject(), argv);
+        }
     }
 }
