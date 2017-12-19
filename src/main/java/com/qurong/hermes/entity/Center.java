@@ -40,7 +40,12 @@ public class Center {
      */
     public void register(String serverId, String address) throws IOException {
         String sessionId = getRandomString();
+        this.status = true;
+        this.sessionId = sessionId;
+        this.serverId = serverId;
+        this.address = address;
 
+        // 发送注册请求
         String resp = HttpUtils.sendGet(String.format("http://%s/register?id=%s&sessionId=%s&host=%s",
                 this.host, serverId, sessionId, address));
         JSONObject data = JSON.parseObject(resp).getJSONObject(Constant.DATA);
@@ -48,10 +53,6 @@ public class Center {
         this.publicKey = String.format("%s%s%s%s", tmp[1], tmp[2], tmp[3], tmp[4]);
         this.length = data.getInteger("Length");
         this.timeout = data.getInteger("Timeout");
-        this.status = true;
-        this.sessionId = sessionId;
-        this.serverId = serverId;
-        this.address = address;
     }
 
     /**

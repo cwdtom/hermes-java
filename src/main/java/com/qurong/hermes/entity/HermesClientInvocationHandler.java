@@ -57,7 +57,7 @@ public class HermesClientInvocationHandler implements InvocationHandler {
      */
     private String call(String serverId, String name, String data) {
         // 筛选可用center
-        List<Center> tmp = new ArrayList<>();
+        List<Center> tmp = new ArrayList<>(Constant.centers.length);
         for (Center c : Constant.centers) {
             if (c.getStatus()) {
                 tmp.add(c);
@@ -98,19 +98,19 @@ public class HermesClientInvocationHandler implements InvocationHandler {
             // 无法解析成json时，向下匹配基础类型
         }
 
-        if (clz.isAssignableFrom(Integer.class) || clz.isAssignableFrom(int.class)) {
+        if (clz.equals(Integer.class) || clz.isAssignableFrom(int.class)) {
             return Integer.parseInt(str);
-        } else if (clz.isAssignableFrom(Long.class) || clz.isAssignableFrom(long.class)) {
+        } else if (clz.equals(Long.class) || clz.isAssignableFrom(long.class)) {
             return Long.parseLong(str);
-        } else if (clz.isAssignableFrom(byte[].class)) {
+        } else if (clz.equals(Byte[].class) || clz.isAssignableFrom(byte[].class)) {
             return str.getBytes("utf-8");
-        } else if (clz.isAssignableFrom(Short.class) || clz.isAssignableFrom(short.class)) {
+        } else if (clz.equals(Short.class) || clz.isAssignableFrom(short.class)) {
             return Short.parseShort(str);
-        } else if (clz.isAssignableFrom(Float.class) || clz.isAssignableFrom(float.class)) {
+        } else if (clz.equals(Float.class) || clz.isAssignableFrom(float.class)) {
             return Float.parseFloat(str);
-        } else if (clz.isAssignableFrom(Double.class) || clz.isAssignableFrom(double.class)) {
+        } else if (clz.equals(Double.class) || clz.isAssignableFrom(double.class)) {
             return Double.parseDouble(str);
-        } else if (clz.isAssignableFrom(Boolean.class) || clz.isAssignableFrom(boolean.class)) {
+        } else if (clz.equals(Boolean.class) || clz.isAssignableFrom(boolean.class)) {
             return Boolean.parseBoolean(str);
         }
         return str;

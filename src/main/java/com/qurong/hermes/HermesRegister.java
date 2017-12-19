@@ -47,13 +47,11 @@ public class HermesRegister implements ImportBeanDefinitionRegistrar,
         for (int i = 0; i < zones.length; i++) {
             Center center = new Center(zones[i]);
             try {
-
                 center.register(this.environment.getProperty("spring.application.name"),
                         String.format("%s:%s", this.environment.getProperty("hermes.host"),
                                 this.environment.getProperty("server.port")));
             } catch (IOException e) {
                 // 注册失败
-                continue;
             }
             centers[i] = center;
         }
