@@ -8,10 +8,7 @@ import com.qurong.hermes.annotation.HermesParam;
 import lombok.AllArgsConstructor;
 
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.util.List;
 
 /**
@@ -84,11 +81,11 @@ public class HermesClientInvocationHandler implements InvocationHandler {
      */
     private Object castType(Class<?> clz, String str)
             throws UnsupportedEncodingException, IllegalAccessException, InstantiationException {
+        // 判断结果是否为空
         if (str == null) {
             return null;
         }
-
-        // 封装class
+        // 判断是否是实体类
         try {
             JSONObject jo = JSON.parseObject(str);
             Object object = clz.newInstance();
@@ -100,21 +97,17 @@ public class HermesClientInvocationHandler implements InvocationHandler {
         } catch (JSONException ignored) {
             // 无法解析成json时，向下匹配基础类型
         }
-
-        if (clz.equals(Integer.class) || clz.isAssignableFrom(int.class)) {
-            return Integer.parseInt(str);
-        } else if (clz.equals(Long.class) || clz.isAssignableFrom(long.class)) {
-            return Long.parseLong(str);
-        } else if (clz.equals(Byte[].class) || clz.isAssignableFrom(byte[].class)) {
+        // 判断是否是二进制数组
+        if (clz.equals(Byte[].class) || clz.isAssignableFrom(byte[].class)) {
             return str.getBytes("utf-8");
-        } else if (clz.equals(Short.class) || clz.isAssignableFrom(short.class)) {
-            return Short.parseShort(str);
-        } else if (clz.equals(Float.class) || clz.isAssignableFrom(float.class)) {
-            return Float.parseFloat(str);
-        } else if (clz.equals(Double.class) || clz.isAssignableFrom(double.class)) {
-            return Double.parseDouble(str);
-        } else if (clz.equals(Boolean.class) || clz.isAssignableFrom(boolean.class)) {
-            return Boolean.parseBoolean(str);
+        }
+        // 调用基础方法的构造器
+        try {
+            Constructor c = clz.getConstructor(String.class);
+            c.setAccessible(true);
+            return c.newInstance(str);
+        } catch (NoSuchMethodException | InvocationTargetException ignored) {
+            // 无法带参实例化直接返回字符串
         }
         return str;
     }
