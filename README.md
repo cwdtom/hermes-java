@@ -22,6 +22,18 @@
 ## Usage
 
 1. 启用hermes
+    - 添加maven依赖
+    ```xml
+    <dependencies>
+        <dependency>
+            <groupId>com.qurong</groupId>
+            <artifactId>hermes</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+    </dependencies>
+    ```
+    
+    - 添加@EnableHermes注解
     ```java
     @SpringBootApplication
     @EnableHermes
@@ -32,7 +44,6 @@
         }
     }
     ```
-    1. 添加@EnableHermes注解
 
 1. 调用远程方法
     ```java
