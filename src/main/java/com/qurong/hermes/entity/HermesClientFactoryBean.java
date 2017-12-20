@@ -11,6 +11,7 @@ import java.lang.reflect.Proxy;
  * client bean工厂
  *
  * @author chenweidong
+ * @since 2.0.0
  */
 @Data
 public class HermesClientFactoryBean implements FactoryBean<Object> {

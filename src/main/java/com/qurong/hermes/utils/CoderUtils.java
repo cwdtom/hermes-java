@@ -6,13 +6,20 @@ import java.util.Base64;
  * 基础加密
  *
  * @author chenweidong
+ * @since 1.0.0
  */
 public class CoderUtils {
+    /**
+     * 16进制映射
+     */
     private final static char[] HEX_ARRAY = {'0', '1', '2', '3', '4', '5', '6', '7',
             '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
     /**
      * BASE64解密
+     *
+     * @param key 密钥
+     * @return 密钥解密结果
      */
     static byte[] decryptBASE64(String key) {
         return Base64.getDecoder().decode(key);
@@ -20,6 +27,9 @@ public class CoderUtils {
 
     /**
      * bytes to hex string
+     *
+     * @param bytes 二进制数据
+     * @return 16进制字符串
      */
     public static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
@@ -33,6 +43,9 @@ public class CoderUtils {
 
     /**
      * hex string to bytes
+     *
+     * @param s 16进制字符串
+     * @return 二进制数据
      */
     public static byte[] hexStringToByteArray(String s) {
         int len = s.length();

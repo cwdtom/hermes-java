@@ -9,6 +9,7 @@ import java.security.spec.X509EncodedKeySpec;
  * RSA安全编码
  *
  * @author chenweidong
+ * @since 1.0.0
  */
 public class RsaUtils extends CoderUtils {
     private final static String KEY_ALGORITHM = "RSA";
@@ -16,6 +17,10 @@ public class RsaUtils extends CoderUtils {
     /**
      * 解密<br>
      * 用公钥解密
+     *
+     * @param data 密文
+     * @param key  公钥
+     * @return 明文
      */
     public static byte[] decryptByPublicKey(byte[] data, String key) throws Exception {
         // 对密钥解密
@@ -33,6 +38,10 @@ public class RsaUtils extends CoderUtils {
     /**
      * 加密<br>
      * 用公钥加密
+     *
+     * @param data 明文
+     * @param key  公钥
+     * @return 密文
      */
     public static byte[] encryptByPublicKey(byte[] data, String key) throws Exception {
         // 对公钥解密

@@ -4,11 +4,13 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.qurong.hermes.annotation.HermesParam;
-import com.qurong.hermes.entity.Center;
-import com.qurong.hermes.entity.Constant;
-import com.qurong.hermes.entity.ServerMethod;
+import com.qurong.hermes.entity.*;
 import com.qurong.hermes.utils.CoderUtils;
 import com.qurong.hermes.utils.RsaUtils;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
@@ -18,20 +20,29 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Parameter;
+import java.util.Map;
 
 /**
  * 调用服务
  *
  * @author chenweidong
+ * @since 1.0.0
  */
+@AllArgsConstructor
 public class HermesServlet extends HttpServlet {
+    /**
+     * 方法路径映射
+     */
+    private Map<String, ServerMethod> methodMap;
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String sessionId = req.getParameter("sessionId");
         String data = req.getParameter("data");
         String name = req.getParameter("name");
 
-        Center center = getCenterBySessionId(sessionId);
+        Center center = ApplicationContextHelper.getBean(Constant.CENTERS_BEAN_NAME, Centers.class)
+                .getCenterBySessionId(sessionId);
         if (center == null) {
             PrintWriter out = resp.getWriter();
             out.write(404);
@@ -76,21 +87,6 @@ public class HermesServlet extends HttpServlet {
     }
 
     /**
-     * 获取对应注册中心
-     *
-     * @param sessionId sessionId
-     * @return 注册中心
-     */
-    private Center getCenterBySessionId(String sessionId) {
-        for (Center c : Constant.centers) {
-            if (sessionId.equals(c.getSessionId())) {
-                return c;
-            }
-        }
-        return null;
-    }
-
-    /**
      * 调用注册方法
      *
      * @param name 方法注册名
@@ -99,7 +95,7 @@ public class HermesServlet extends HttpServlet {
      */
     private Object invokeMethodByName(String name, String argv)
             throws InvocationTargetException, IllegalAccessException {
-        ServerMethod target = Constant.methodMap.get(name);
+        ServerMethod target = this.methodMap.get(name);
         Parameter[] params = target.getMethod().getParameters();
         try {
             JSONObject jo = JSON.parseObject(argv);

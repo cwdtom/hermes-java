@@ -14,16 +14,41 @@ import java.util.Random;
  * 注册中心
  *
  * @author chenweidong
+ * @since 1.0.0
  */
 @Data
 public class Center {
+    /**
+     * 本服务地址
+     */
     private String host;
+    /**
+     * 公钥
+     */
     private String publicKey;
+    /**
+     * RSA长度，用于判断密文是否过长
+     */
     private Integer length;
+    /**
+     * 服务超时时间
+     */
     private Integer timeout;
+    /**
+     * 服务对注册中心唯一ID
+     */
     private String sessionId;
+    /**
+     * 状态
+     */
     private Boolean status;
+    /**
+     * 注册服务ID
+     */
     private String serverId;
+    /**
+     * 注册中心地址
+     */
     private String address;
 
     public Center(String host) {
@@ -44,7 +69,6 @@ public class Center {
         this.sessionId = sessionId;
         this.serverId = serverId;
         this.address = address;
-
         // 发送注册请求
         String resp = HttpUtils.sendGet(String.format("http://%s/register?id=%s&sessionId=%s&host=%s",
                 this.host, serverId, sessionId, address));

@@ -10,12 +10,13 @@ import java.net.URLConnection;
  * HTTP工具
  *
  * @author tom
+ * @since 1.0.0
  */
 public class HttpUtils {
     /**
      * 发送GET请求
      *
-     * @param url   目标URL
+     * @param url 目标URL
      * @return 响应结果
      */
     public static String sendGet(String url) throws IOException {
@@ -23,7 +24,7 @@ public class HttpUtils {
         URL realUrl = new URL(url);
         URLConnection connection = realUrl.openConnection();
         connection.connect();
-        try(BufferedReader in = new BufferedReader(
+        try (BufferedReader in = new BufferedReader(
                 new InputStreamReader(connection.getInputStream(), "UTF-8"))) {
             String line;
             while ((line = in.readLine()) != null) {

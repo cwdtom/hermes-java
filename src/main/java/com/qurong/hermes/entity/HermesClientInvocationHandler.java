@@ -12,16 +12,19 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 动态代理HermesClient接口
  *
  * @author chenweidong
+ * @since 2.0.0
  */
 @AllArgsConstructor
 public class HermesClientInvocationHandler implements InvocationHandler {
+    /**
+     * 调用服务serverId
+     */
     private String serverId;
 
     @Override
@@ -57,12 +60,7 @@ public class HermesClientInvocationHandler implements InvocationHandler {
      */
     private String call(String serverId, String name, String data) {
         // 筛选可用center
-        List<Center> tmp = new ArrayList<>(Constant.centers.length);
-        for (Center c : Constant.centers) {
-            if (c.getStatus()) {
-                tmp.add(c);
-            }
-        }
+        List<Center> tmp = ApplicationContextHelper.getBean(Constant.CENTERS_BEAN_NAME, Centers.class).getAbleCenter();
         int size = tmp.size();
         if (size == 0) {
             return null;
@@ -79,6 +77,7 @@ public class HermesClientInvocationHandler implements InvocationHandler {
 
     /**
      * 类型转换
+     *
      * @param clz 返回类
      * @param str 字符串结果
      * @return 转换结果

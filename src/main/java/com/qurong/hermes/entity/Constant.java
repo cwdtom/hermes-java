@@ -1,21 +1,16 @@
 package com.qurong.hermes.entity;
 
-import java.util.Map;
-
 /**
  * 项目静态量
  *
  * @author chenweidong
+ * @since 1.0.0
  */
 public class Constant {
     /**
-     * 注册中心列表
+     * 注册中心bean name
      */
-    public static Center[] centers;
-    /**
-     * 方法路径映射
-     */
-    public static Map<String, ServerMethod> methodMap;
+    public static final String CENTERS_BEAN_NAME = "centers";
     /**
      * 状态码字段
      */

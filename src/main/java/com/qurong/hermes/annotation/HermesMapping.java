@@ -1,15 +1,19 @@
 package com.qurong.hermes.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
+/**
+ * 服务名注册
+ *
+ * @author chenweidong
+ * @since 1.2.0
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
+@Documented
 public @interface HermesMapping {
     /**
-     * 服务名称
+     * 需要调用的服务名
      */
     String value();
 }
