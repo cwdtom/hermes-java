@@ -84,6 +84,10 @@ public class HermesClientInvocationHandler implements InvocationHandler {
      */
     private Object castType(Class<?> clz, String str)
             throws UnsupportedEncodingException, IllegalAccessException, InstantiationException {
+        if (str == null) {
+            return null;
+        }
+
         // 封装class
         try {
             JSONObject jo = JSON.parseObject(str);
