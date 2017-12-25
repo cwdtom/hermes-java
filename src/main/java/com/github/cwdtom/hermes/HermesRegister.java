@@ -46,7 +46,7 @@ public class HermesRegister implements ImportBeanDefinitionRegistrar, Environmen
                 center.register(this.environment.getProperty("spring.application.name"),
                         String.format("%s:%s", this.environment.getProperty("hermes.host"),
                                 this.environment.getProperty("server.port")));
-            } catch (IOException e) {
+            } catch (IOException ignored) {
                 // 注册失败
             }
             centers[i] = center;
