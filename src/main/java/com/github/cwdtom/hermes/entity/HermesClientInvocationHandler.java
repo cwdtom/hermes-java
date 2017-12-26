@@ -61,15 +61,27 @@ public class HermesClientInvocationHandler implements InvocationHandler {
         int size = tmp.size();
         if (size == 0) {
             return null;
+        } else if (size == 1) {
+            try {
+                return tmp.get(0).call(serverId, name, data);
+            } catch (Exception ignored) {
+                return null;
+            }
+        } else {
+            int index = (int) System.currentTimeMillis() % size;
+            try {
+                return tmp.get(index).call(serverId, name, data);
+            } catch (Exception ignored) {
+                tmp.get(index).setStatus(false);
+                // 重试
+                index = (size - 1) % index;
+                try {
+                    return tmp.get(index).call(serverId, name, data);
+                } catch (Exception ignored2) {
+                    return null;
+                }
+            }
         }
-        int index = (int) System.currentTimeMillis() % size;
-        String resp = null;
-        try {
-            resp = tmp.get(index).call(serverId, name, data);
-        } catch (Exception ignored) {
-            tmp.get(index).setStatus(false);
-        }
-        return resp;
     }
 
     /**
