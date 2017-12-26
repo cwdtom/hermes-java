@@ -30,13 +30,13 @@ public class HermesClientInvocationHandler implements InvocationHandler {
         HermesMapping hm = method.getAnnotation(HermesMapping.class);
         String name = hm == null ? "" : hm.value();
         Parameter[] params = method.getParameters();
-        int len = args.length;
 
-        if (len == 0) {
+        if (args == null || args.length == 0) {
             // 无参数情况下调用空json
             return castType(method.getReturnType(), call(this.serverId, name, "{}"));
         }
         JSONObject jo = new JSONObject();
+        int len = args.length;
         for (int i = 0; i < len; i++) {
             HermesParam hp = params[i].getAnnotation(HermesParam.class);
             if (hp == null) {
@@ -89,7 +89,7 @@ public class HermesClientInvocationHandler implements InvocationHandler {
         try {
             JSONObject jo = JSON.parseObject(str);
             Object object = clz.newInstance();
-            for (Field f : clz.getFields()) {
+            for (Field f : clz.getDeclaredFields()) {
                 f.setAccessible(true);
                 f.set(object, jo.get(f.getName()));
             }

@@ -11,7 +11,7 @@ import com.github.cwdtom.hermes.annotation.HermesParam;
  * @since 2.0.0
  */
 @HermesClient("client")
-public interface TestService {
+public interface Service {
     /**
      * 加1
      */
@@ -29,4 +29,10 @@ public interface TestService {
      */
     @HermesMapping("testMul")
     Integer mul(@HermesParam("num") Integer num, @HermesParam("mul") Integer mul);
+
+    /**
+     * 返回实体类
+     */
+    @HermesMapping("returnObject")
+    Entity returnObject();
 }

@@ -11,7 +11,7 @@ import com.github.cwdtom.hermes.annotation.HermesService;
  * @since 1.0.0
  */
 @HermesService
-public class TestServer {
+public class Server {
     /**
      * 加1
      */
@@ -34,5 +34,16 @@ public class TestServer {
     @HermesMapping("testMul")
     public Integer testMul(@HermesParam("num") Integer num, @HermesParam("mul") Integer mul) {
         return num * mul;
+    }
+
+    /**
+     * 返回对象实体
+     */
+    @HermesMapping("returnObject")
+    public Entity returnObject() {
+        Entity e = new Entity();
+        e.setName("test");
+        e.setCode(200);
+        return e;
     }
 }

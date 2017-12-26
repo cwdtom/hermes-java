@@ -16,9 +16,9 @@ import javax.annotation.Resource;
  */
 @RestController
 @RequestMapping(method = RequestMethod.GET)
-public class MainController {
+public class Controller {
     @Resource
-    private TestService testService;
+    private Service service;
     @Resource
     private Centers centers;
 
@@ -35,7 +35,7 @@ public class MainController {
      */
     @RequestMapping("/callAdd")
     public Integer callAdd(Integer num) {
-        return testService.add(num);
+        return service.add(num);
     }
 
     /**
@@ -43,7 +43,7 @@ public class MainController {
      */
     @RequestMapping("/callSub")
     public Integer callSub(Integer num) {
-        return testService.sub(num);
+        return service.sub(num);
     }
 
     /**
@@ -51,6 +51,14 @@ public class MainController {
      */
     @RequestMapping("/callMul")
     public Integer callAdd(Integer num, Integer mul) {
-        return testService.mul(num, mul);
+        return service.mul(num, mul);
+    }
+
+    /**
+     * 返回实体
+     */
+    @RequestMapping("/callReturnObject")
+    public Entity callReturnObject() {
+        return service.returnObject();
     }
 }
