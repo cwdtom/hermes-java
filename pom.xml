@@ -6,7 +6,7 @@
 
     <groupId>com.github.cwdtom</groupId>
     <artifactId>hermes</artifactId>
-    <version>2.0.2</version>
+    <version>2.0.3</version>
     <description>hermes java sdk</description>
     <packaging>jar</packaging>
     <name>Hermes-java</name>
