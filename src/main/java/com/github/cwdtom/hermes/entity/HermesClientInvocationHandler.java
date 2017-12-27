@@ -7,6 +7,7 @@ import com.github.cwdtom.hermes.annotation.HermesMapping;
 import com.github.cwdtom.hermes.annotation.HermesParam;
 import lombok.AllArgsConstructor;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.*;
 import java.util.List;
@@ -25,8 +26,7 @@ public class HermesClientInvocationHandler implements InvocationHandler {
     private String serverId;
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args)
-            throws UnsupportedEncodingException, InstantiationException, IllegalAccessException {
+    public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
         HermesMapping hm = method.getAnnotation(HermesMapping.class);
         String name = hm == null ? "" : hm.value();
         Parameter[] params = method.getParameters();
@@ -55,7 +55,7 @@ public class HermesClientInvocationHandler implements InvocationHandler {
      * @param data     数据
      * @return 响应结果
      */
-    private String call(String serverId, String name, String data) {
+    private String call(String serverId, String name, String data) throws Exception {
         // 筛选可用center
         List<Center> tmp = ApplicationContextHelper.getBean(Constant.CENTERS_BEAN_NAME, Centers.class).getAbleCenter();
         int size = tmp.size();
@@ -64,22 +64,19 @@ public class HermesClientInvocationHandler implements InvocationHandler {
         } else if (size == 1) {
             try {
                 return tmp.get(0).call(serverId, name, data);
-            } catch (Exception ignored) {
+            } catch (IOException ignored) {
+                tmp.get(0).setStatus(false);
                 return null;
             }
         } else {
             int index = (int) System.currentTimeMillis() % size;
             try {
                 return tmp.get(index).call(serverId, name, data);
-            } catch (Exception ignored) {
+            } catch (IOException ignored) {
+                // 只catch io错误，其他错误向上抛
                 tmp.get(index).setStatus(false);
                 // 重试
-                index = (size - 1) % index;
-                try {
-                    return tmp.get(index).call(serverId, name, data);
-                } catch (Exception ignored2) {
-                    return null;
-                }
+                return call(serverId, name, data);
             }
         }
     }
@@ -91,8 +88,7 @@ public class HermesClientInvocationHandler implements InvocationHandler {
      * @param str 字符串结果
      * @return 转换结果
      */
-    private Object castType(Class<?> clz, String str)
-            throws UnsupportedEncodingException, IllegalAccessException, InstantiationException {
+    private Object castType(Class<?> clz, String str) {
         // 判断结果是否为空
         if (str == null) {
             return null;
@@ -106,19 +102,20 @@ public class HermesClientInvocationHandler implements InvocationHandler {
                 f.set(object, jo.get(f.getName()));
             }
             return object;
-        } catch (JSONException ignored) {
+        } catch (JSONException | IllegalAccessException | InstantiationException ignored) {
             // 无法解析成json时，向下匹配基础类型
         }
-        // 判断是否是二进制数组
-        if (clz.equals(Byte[].class) || clz.isAssignableFrom(byte[].class)) {
-            return str.getBytes("utf-8");
-        }
-        // 调用基础方法的构造器
         try {
+            // 判断是否是二进制数组
+            if (clz.equals(Byte[].class) || clz.isAssignableFrom(byte[].class)) {
+                return str.getBytes("utf-8");
+            }
+            // 调用基础方法的构造器
             Constructor c = clz.getConstructor(String.class);
             c.setAccessible(true);
             return c.newInstance(str);
-        } catch (NoSuchMethodException | InvocationTargetException ignored) {
+        } catch (NoSuchMethodException | InvocationTargetException |
+                IllegalAccessException | InstantiationException | UnsupportedEncodingException ignored) {
             // 无法带参实例化直接返回字符串
         }
         return str;
