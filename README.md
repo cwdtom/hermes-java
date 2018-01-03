@@ -1,7 +1,7 @@
 # Hermes - Java
 
 
-![Version](https://img.shields.io/badge/version-2.0.4-green.svg)
+![Version](https://img.shields.io/badge/version-2.1.0-green.svg)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 
 ## Overview
@@ -77,7 +77,7 @@
     /**
      * 定义调用接口
      */
-    @HermesClient("client")
+    @HermesClient(value = "client", fallback = FallBackServiceImpl.class)
     public interface TestService {
         @HermesMapping("testAdd")
         Integer add(@HermesParam("num") Integer num);
@@ -88,6 +88,34 @@
         @HermesMapping("testMul")
         Integer mul(@HermesParam("num") Integer num, @HermesParam("mul") Integer mul);
     }
+    ```
+    
+    ```java
+    /**
+     * 失败回调
+     */
+    public class FallBackServiceImpl implements Service {
+        @Override
+        public Integer add(Integer num) {
+            return -1;
+        }
+    
+        @Override
+        public Integer sub(Integer num) {
+            return -1;
+        }
+    
+        @Override
+        public Integer mul(Integer num, Integer mul) {
+            return -1;
+        }
+    
+        @Override
+        public Entity returnObject() {
+            return null;
+        }
+    }
+
     ```
 
 1. 创建远程调用方法

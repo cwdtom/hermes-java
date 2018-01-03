@@ -16,4 +16,8 @@ public @interface HermesClient {
      * @return 需要调用服务的serverId
      */
     String value();
+    /**
+     * @return 失败回调类
+     */
+    Class<?> fallback() default void.class;
 }

@@ -122,9 +122,12 @@ public class HermesRegister implements ImportBeanDefinitionRegistrar, Environmen
         // 获取HermesClient注解类
         Set<Class<?>> classes = reflections.getTypesAnnotatedWith(HermesClient.class);
         for (Class<?> c : classes) {
-            BeanDefinitionBuilder bdb = BeanDefinitionBuilder.rootBeanDefinition(HermesClientFactoryBean.class)
-                    .addPropertyValue("type", c);
-            registry.registerBeanDefinition(c.getName(), bdb.getBeanDefinition());
+            // 是否是接口类
+            if (c.isInterface()) {
+                BeanDefinitionBuilder bdb = BeanDefinitionBuilder.rootBeanDefinition(HermesClientFactoryBean.class)
+                        .addPropertyValue("type", c);
+                registry.registerBeanDefinition(c.getName(), bdb.getBeanDefinition());
+            }
         }
     }
 }

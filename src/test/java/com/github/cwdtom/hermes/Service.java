@@ -10,7 +10,7 @@ import com.github.cwdtom.hermes.annotation.HermesParam;
  * @author chenweidong
  * @since 2.0.0
  */
-@HermesClient("client")
+@HermesClient(value = "client", fallback = FallBackServiceImpl.class)
 public interface Service {
     /**
      * 加1

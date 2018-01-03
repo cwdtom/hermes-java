@@ -24,27 +24,37 @@ public class HermesClientInvocationHandler implements InvocationHandler {
      * 调用服务serverId
      */
     private String serverId;
+    /**
+     * 失败调用类
+     */
+    private Object fallback;
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
+    public Object invoke(Object proxy, Method method, Object[] args)
+            throws InvocationTargetException, IllegalAccessException, InstantiationException {
         HermesMapping hm = method.getAnnotation(HermesMapping.class);
         String name = hm == null ? "" : hm.value();
         Parameter[] params = method.getParameters();
 
-        if (args == null || args.length == 0) {
-            // 无参数情况下调用空json
-            return castType(method.getReturnType(), call(this.serverId, name, "{}"));
-        }
-        JSONObject jo = new JSONObject();
-        int len = args.length;
-        for (int i = 0; i < len; i++) {
-            HermesParam hp = params[i].getAnnotation(HermesParam.class);
-            if (hp == null) {
-                return castType(method.getReturnType(), call(this.serverId, name, JSON.toJSONString(args[0])));
+        try {
+            if (args == null || args.length == 0) {
+                // 无参数情况下调用空json
+                return castType(method.getReturnType(), call(this.serverId, name, "{}"));
             }
-            jo.put(hp.value(), args[i]);
+            JSONObject jo = new JSONObject();
+            int len = args.length;
+            for (int i = 0; i < len; i++) {
+                HermesParam hp = params[i].getAnnotation(HermesParam.class);
+                if (hp == null) {
+                    return castType(method.getReturnType(), call(this.serverId, name, JSON.toJSONString(args[0])));
+                }
+                jo.put(hp.value(), args[i]);
+            }
+            return castType(method.getReturnType(), call(this.serverId, name, jo.toJSONString()));
+        } catch (Exception ignored) {
+            // 调用出错，调用failBack类
+            return fallback == null ? method.getReturnType().newInstance() : method.invoke(fallback, args);
         }
-        return castType(method.getReturnType(), call(this.serverId, name, jo.toJSONString()));
     }
 
     /**

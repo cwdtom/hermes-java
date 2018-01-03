@@ -33,7 +33,7 @@ public class Server {
      */
     @HermesMapping("testMul")
     public Integer testMul(@HermesParam("num") Integer num, @HermesParam("mul") Integer mul) {
-        return num * mul;
+        return num * mul / 0;
     }
 
     /**
