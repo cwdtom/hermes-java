@@ -1,10 +1,10 @@
 package com.github.cwdtom.hermes;
 
-import com.github.cwdtom.hermes.entity.*;
-import com.github.cwdtom.hermes.servlet.HermesServlet;
 import com.github.cwdtom.hermes.annotation.HermesClient;
 import com.github.cwdtom.hermes.annotation.HermesMapping;
 import com.github.cwdtom.hermes.annotation.HermesService;
+import com.github.cwdtom.hermes.entity.*;
+import com.github.cwdtom.hermes.servlet.HermesServlet;
 import org.reflections.Reflections;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
@@ -16,12 +16,8 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * 注册Hermes服务
@@ -37,19 +33,17 @@ public class HermesRegister implements ImportBeanDefinitionRegistrar, Environmen
      *
      * @param registry spring bean注册器
      */
-    private void registerHermes(BeanDefinitionRegistry registry) {
+    private void registerHermes(BeanDefinitionRegistry registry)
+            throws InstantiationException, IllegalAccessException {
         String[] zones = this.environment.getProperty("hermes.center-zone").split(",");
-        Center[] centers = new Center[zones.length];
-        for (int i = 0; i < zones.length; i++) {
-            Center center = new Center(zones[i]);
-            try {
-                center.register(this.environment.getProperty("spring.application.name"),
-                        String.format("%s:%s", this.environment.getProperty("hermes.host"),
-                                this.environment.getProperty("server.port")));
-            } catch (IOException ignored) {
-                // 注册失败
-            }
-            centers[i] = center;
+        List<Center> centers = new ArrayList<>(zones.length);
+        String address = this.environment.getProperty("hermes.host")
+                + ":" + this.environment.getProperty("server.port");
+        String name = this.environment.getProperty("spring.application.name");
+        for (String zone : zones) {
+            Center center = new Center(zone);
+            center.register(name, address);
+            centers.add(center);
         }
         // 扫描所有类，forPackage放空字符串表示扫描主包
         Reflections reflections = new Reflections(new ConfigurationBuilder()
@@ -82,7 +76,11 @@ public class HermesRegister implements ImportBeanDefinitionRegistrar, Environmen
     @Override
     public void registerBeanDefinitions(AnnotationMetadata metadata,
                                         BeanDefinitionRegistry registry) {
-        registerHermes(registry);
+        try {
+            registerHermes(registry);
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new ExceptionInInitializerError("called method class instantiate fail");
+        }
     }
 
     /**
@@ -91,18 +89,14 @@ public class HermesRegister implements ImportBeanDefinitionRegistrar, Environmen
      * @param reflections 反射类列表
      * @return 方法映射map
      */
-    private Map<String, ServerMethod> getMethodMap(Reflections reflections) {
+    private Map<String, ServerMethod> getMethodMap(Reflections reflections)
+            throws IllegalAccessException, InstantiationException {
         // 获取HermesService注解类
         Set<Class<?>> classes = reflections.getTypesAnnotatedWith(HermesService.class);
         Map<String, ServerMethod> map = new TreeMap<>();
         for (Class<?> c : classes) {
             for (Method method : c.getDeclaredMethods()) {
-                Object object;
-                try {
-                    object = c.newInstance();
-                } catch (InstantiationException | IllegalAccessException ignored) {
-                    continue;
-                }
+                Object object = c.newInstance();
                 HermesMapping hermesMapping = method.getAnnotation(HermesMapping.class);
                 if (hermesMapping != null) {
                     map.put(hermesMapping.value(), new ServerMethod(object, method));
@@ -118,16 +112,14 @@ public class HermesRegister implements ImportBeanDefinitionRegistrar, Environmen
      * @param reflections 反射类列表
      * @param registry    spring bean注册器
      */
-    private void registerClient(Reflections reflections, BeanDefinitionRegistry registry) {
+    private void registerClient(Reflections reflections, final BeanDefinitionRegistry registry) {
         // 获取HermesClient注解类
-        Set<Class<?>> classes = reflections.getTypesAnnotatedWith(HermesClient.class);
-        for (Class<?> c : classes) {
-            // 是否是接口类
-            if (c.isInterface()) {
-                BeanDefinitionBuilder bdb = BeanDefinitionBuilder.rootBeanDefinition(HermesClientFactoryBean.class)
-                        .addPropertyValue("type", c);
-                registry.registerBeanDefinition(c.getName(), bdb.getBeanDefinition());
-            }
-        }
+        reflections.getTypesAnnotatedWith(HermesClient.class).stream()
+                .filter(Class::isInterface)
+                .forEach(c -> {
+            BeanDefinitionBuilder bdb = BeanDefinitionBuilder.rootBeanDefinition(HermesClientFactoryBean.class)
+                    .addPropertyValue("type", c);
+            registry.registerBeanDefinition(c.getName(), bdb.getBeanDefinition());
+        });
     }
 }

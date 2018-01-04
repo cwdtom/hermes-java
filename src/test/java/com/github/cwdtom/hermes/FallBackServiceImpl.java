@@ -17,7 +17,7 @@ public class FallBackServiceImpl implements Service {
     }
 
     @Override
-    public Integer mul(Integer num, Integer mul) {
+    public int mul(Integer num, Integer mul) {
         return -1;
     }
 

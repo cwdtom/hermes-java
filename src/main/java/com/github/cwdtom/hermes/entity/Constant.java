@@ -1,5 +1,8 @@
 package com.github.cwdtom.hermes.entity;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 项目静态量
  *
@@ -27,4 +30,12 @@ public class Constant {
      * RSA加密保留长度
      */
     public static final Integer RSA_RESERVED_LENGTH = 11;
+
+    public static final Map<String, Class<?>> CAST_TYPE_MAP = new HashMap<String, Class<?>>(){{
+        put("int", Integer.class);
+        put("float", Float.class);
+        put("long", Long.class);
+        put("double", Double.class);
+        put("short", Short.class);
+    }};
 }

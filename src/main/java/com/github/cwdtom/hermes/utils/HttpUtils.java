@@ -22,11 +22,10 @@ public class HttpUtils {
      */
     public static String sendGet(String url) throws IOException {
         StringBuilder result = new StringBuilder();
-        URL realUrl = new URL(url);
-        URLConnection connection = realUrl.openConnection();
+        URLConnection connection = new URL(url).openConnection();
         connection.connect();
         try (BufferedReader in = new BufferedReader(
-                new InputStreamReader(connection.getInputStream(), "UTF-8"))) {
+                new InputStreamReader(connection.getInputStream(), "utf-8"))) {
             String line;
             while ((line = in.readLine()) != null) {
                 result.append(line);

@@ -61,45 +61,40 @@ public class Center {
      *
      * @param serverId 服务ID
      * @param address  服务host
-     * @throws IOException 请求异常
      */
-    public void register(String serverId, String address) throws IOException {
-        String sessionId = getRandomString();
-        this.status = true;
-        this.sessionId = sessionId;
+    public void register(String serverId, String address) {
+        this.sessionId = getRandomString();
         this.serverId = serverId;
         this.address = address;
         // 发送注册请求
-        String resp = HttpUtils.sendGet(String.format("http://%s/register?id=%s&sessionId=%s&host=%s",
-                this.host, serverId, sessionId, address));
-        JSONObject data = JSON.parseObject(resp).getJSONObject(Constant.DATA);
-        String[] tmp = data.getString("PublicKey").split("\n");
-        this.publicKey = String.format("%s%s%s%s", tmp[1], tmp[2], tmp[3], tmp[4]);
-        this.length = data.getInteger("Length");
-        this.timeout = data.getInteger("Timeout");
+        try {
+            String resp = HttpUtils.sendGet(String.format("http://%s/register?id=%s&sessionId=%s&host=%s",
+                    this.host, serverId, this.sessionId, address));
+            this.status = true;
+            JSONObject data = JSON.parseObject(resp).getJSONObject(Constant.DATA);
+            String[] tmp = data.getString("PublicKey").split("\n");
+            this.publicKey = tmp[1] + tmp[2] + tmp[3] + tmp[4];
+            this.length = data.getInteger("Length");
+            this.timeout = data.getInteger("Timeout");
+        } catch (IOException ignored) {
+        }
     }
 
     /**
      * 心跳检测
      */
     public void heartBeat() {
-        String resp;
         try {
-
-            resp = HttpUtils.sendGet(String.format("http://%s/heartBeat?sessionId=%s", this.host, this.sessionId));
+            String resp = HttpUtils.sendGet(
+                    String.format("http://%s/heartBeat?sessionId=%s", this.host, this.sessionId));
+            this.status = JSON.parseObject(resp).getInteger(Constant.CODE) == 0;
+            if (!this.status) {
+                // 尝试重新注册
+                this.register(this.serverId, this.address);
+            }
         } catch (IOException e) {
             // 心跳失败
             this.status = false;
-            return;
-        }
-        JSONObject obj = JSON.parseObject(resp);
-        this.status = obj.getInteger(Constant.CODE) == 0;
-        if (!this.status) {
-            // 尝试重新注册
-            try {
-                this.register(this.serverId, this.address);
-            } catch (IOException ignored) {
-            }
         }
     }
 
@@ -116,7 +111,7 @@ public class Center {
         // 加密请求数据
         byte[] in = data.getBytes("utf-8");
         if (in.length > this.length - Constant.RSA_RESERVED_LENGTH) {
-            throw new Exception("data is too big");
+            throw new Exception("request data is too big");
         }
         byte[] bytes = RsaUtils.encryptByPublicKey(in, this.publicKey);
         // bytes转16进制发送

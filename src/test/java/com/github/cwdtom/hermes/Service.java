@@ -28,7 +28,7 @@ public interface Service {
      * 相乘
      */
     @HermesMapping("testMul")
-    Integer mul(@HermesParam("num") Integer num, @HermesParam("mul") Integer mul);
+    int mul(@HermesParam("num") Integer num, @HermesParam("mul") Integer mul);
 
     /**
      * 返回实体类

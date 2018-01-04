@@ -18,8 +18,7 @@ public class Timer {
      */
     @Scheduled(initialDelay = 60000, fixedRate = 60000)
     public void heartBeat() {
-        for (Center c : ApplicationContextHelper.getBean(Constant.CENTERS_BEAN_NAME, Centers.class).getCenters()) {
-            c.heartBeat();
-        }
+        ApplicationContextHelper.getBean(Constant.CENTERS_BEAN_NAME, Centers.class)
+                .getCenters().forEach(Center::heartBeat);
     }
 }

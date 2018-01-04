@@ -1,9 +1,9 @@
 package com.github.cwdtom.hermes.entity;
 
-import lombok.Data;
-
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 /**
  * 注册中心单例
@@ -11,12 +11,30 @@ import java.util.List;
  * @author chenweidong
  * @since 2.0.1
  */
-@Data
 public class Centers {
     /**
      * 注册中心列表
      */
-    private Center[] centers;
+    private List<Center> centers;
+    /**
+     * 查找列表
+     */
+    private Map<String, Center> centerMap;
+
+    /**
+     * bean注入时反射调用
+     *
+     * @param centers 注册中心
+     */
+    public void setCenters(List<Center> centers) {
+        this.centerMap = new TreeMap<>();
+        centers.forEach(c -> this.centerMap.put(c.getSessionId(), c));
+        this.centers = centers;
+    }
+
+    public List<Center> getCenters() {
+        return this.centers;
+    }
 
     /**
      * 获取对应注册中心
@@ -25,12 +43,7 @@ public class Centers {
      * @return 注册中心
      */
     public Center getCenterBySessionId(String sessionId) {
-        for (Center c : this.centers) {
-            if (sessionId.equals(c.getSessionId())) {
-                return c;
-            }
-        }
-        return null;
+        return this.centerMap.get(sessionId);
     }
 
     /**
@@ -39,12 +52,8 @@ public class Centers {
      * @return 可用列表
      */
     public List<Center> getAbleCenter() {
-        List<Center> ableList = new ArrayList<>(this.centers.length);
-        for (Center c : this.centers) {
-            if (c.getStatus()) {
-                ableList.add(c);
-            }
-        }
-        return ableList;
+        return this.centers.parallelStream()
+                .filter(Center::getStatus)
+                .collect(Collectors.toList());
     }
 }
