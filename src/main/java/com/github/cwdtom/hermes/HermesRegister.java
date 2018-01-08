@@ -37,12 +37,10 @@ public class HermesRegister implements ImportBeanDefinitionRegistrar, Environmen
             throws InstantiationException, IllegalAccessException {
         String[] zones = this.environment.getProperty("hermes.center-zone").split(",");
         List<Center> centers = new ArrayList<>(zones.length);
-        String address = this.environment.getProperty("hermes.host")
-                + ":" + this.environment.getProperty("server.port");
         String name = this.environment.getProperty("spring.application.name");
         for (String zone : zones) {
             Center center = new Center(zone);
-            center.register(name, address);
+            center.register(name, this.environment.getProperty("server.port"));
             centers.add(center);
         }
         // 扫描所有类，forPackage放空字符串表示扫描主包

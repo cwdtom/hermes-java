@@ -49,7 +49,7 @@ public class Center {
     /**
      * 注册中心地址
      */
-    private String address;
+    private String port;
 
     public Center(String host) {
         this.host = host;
@@ -60,18 +60,22 @@ public class Center {
      * 注册
      *
      * @param serverId 服务ID
-     * @param address  服务host
+     * @param port  服务端口号
      */
-    public void register(String serverId, String address) {
+    public void register(String serverId, String port) {
         this.sessionId = getRandomString();
         this.serverId = serverId;
-        this.address = address;
+        this.port = port;
         // 发送注册请求
         try {
-            String resp = HttpUtils.sendGet(String.format("http://%s/register?id=%s&sessionId=%s&host=%s",
-                    this.host, serverId, this.sessionId, address));
+            String resp = HttpUtils.sendGet(String.format("http://%s/register?id=%s&sessionId=%s&port=%s",
+                    this.host, serverId, this.sessionId, port));
             this.status = true;
-            JSONObject data = JSON.parseObject(resp).getJSONObject(Constant.DATA);
+            JSONObject obj = JSON.parseObject(resp);
+            if (obj.getInteger(Constant.CODE) != 0) {
+                throw new ExceptionInInitializerError("register server fail");
+            }
+            JSONObject data = obj.getJSONObject(Constant.DATA);
             String[] tmp = data.getString("PublicKey").split("\n");
             this.publicKey = tmp[1] + tmp[2] + tmp[3] + tmp[4];
             this.length = data.getInteger("Length");
@@ -90,7 +94,7 @@ public class Center {
             this.status = JSON.parseObject(resp).getInteger(Constant.CODE) == 0;
             if (!this.status) {
                 // 尝试重新注册
-                this.register(this.serverId, this.address);
+                this.register(this.serverId, this.port);
             }
         } catch (IOException e) {
             // 心跳失败

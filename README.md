@@ -1,22 +1,20 @@
 # Hermes - Java
 
 
-![Version](https://img.shields.io/badge/version-2.2.0-green.svg)
+![Version](https://img.shields.io/badge/version-2.3.0-green.svg)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](http://opensource.org/licenses/MIT)
 
 ## Overview
-- 基于spring-boot、Hermes中间件Java端SDK，需要JDK8及以上
+- 基于spring-boot、Hermes中间件Java端SDK，需要JDK8及以上，2.3.0及以上版本需要hermes注册中心在2.1.0版本及以上
 - Hermes (https://github.com/cwdtom/hermes)
 
 ## Configuration
 - application中添加新配置
-    ```text
+    ```properties
    # 自身服务ID
    spring.application.name=client
    # 注册中心地址，多个地址以逗号隔开
    hermes.center-zone=127.0.0.1:8080
-   # 本地服务地址
-   hermes.host=127.0.0.1
     ```
 
 ## Usage
@@ -28,7 +26,7 @@
         <dependency>
             <groupId>com.github.cwdtom</groupId>
             <artifactId>hermes</artifactId>
-            <version>2.1.0</version>
+            <version>2.3.0</version>
         </dependency>
     </dependencies>
     ```
@@ -44,6 +42,7 @@
         }
     }
     ```
+
 
 1. 调用远程方法
     ```java
