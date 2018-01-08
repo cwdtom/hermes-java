@@ -51,7 +51,7 @@ public class HermesClientInvocationHandler implements InvocationHandler {
             }
             return castType(method.getReturnType(), call(this.serverId, name, obj.toJSONString()));
         } catch (Exception e) {
-            // 调用出错，调用failBack类
+            // 调用出错，调用fallBack类
             return fallback == null ? null : method.invoke(fallback, args);
         }
     }
@@ -102,7 +102,7 @@ public class HermesClientInvocationHandler implements InvocationHandler {
         // 判断结果是否为空
         if (str == null) {
             return null;
-        } else if (clz.equals(String.class)) {
+        }else if (clz.equals(String.class)) {
             return str;
         }
         // 判断是否是实体类
